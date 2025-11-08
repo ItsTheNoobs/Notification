@@ -127,8 +127,7 @@ function NotificationLibrary:CreateNotification(title, body, notifType)
 		Text = title,
 		TextColor3 = Color3.fromRGB(250, 250, 250),
 		TextSize = 16,
-		TextXAlignment = Enum.TextXAlignment.Left,
-		TextTruncated = true
+		TextXAlignment = Enum.TextXAlignment.Left
 	})
 	
 	-- Body text
