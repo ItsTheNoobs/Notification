@@ -1,204 +1,159 @@
-local NotificationLibrary = {}
+local NotifUI = Instance.new("ScreenGui")
+local Holder = Instance.new("ScrollingFrame")
+local Buttons = Instance.new("Frame")
+local UICorner_3 = Instance.new("UICorner")
+local TextLabel_3 = Instance.new("TextLabel")
+local TextLabel_4 = Instance.new("TextLabel")
+local TextButton_2 = Instance.new("TextButton")
+local UICorner_4 = Instance.new("UICorner")
+local TextButton_3 = Instance.new("TextButton")
+local UICorner_5 = Instance.new("UICorner")
+local Sorter = Instance.new("UIListLayout")
 
--- Configuration
-local CONFIG = {
-	DURATION = 5,
-	SLIDE_TIME = 0.6,
-	ICONS = {
-		error = "rbxassetid://2777727756",
-		success = "rbxassetid://2790552399",
-		info = "rbxassetid://2790676563"
-	},
-	COLORS = {
-		error = Color3.fromRGB(239, 68, 68),
-		success = Color3.fromRGB(34, 197, 94),
-		info = Color3.fromRGB(59, 130, 246)
-	},
-	BACKGROUND = Color3.fromRGB(24, 24, 27),
-	BORDER = Color3.fromRGB(39, 39, 42)
-}
+NotifUI.Name = "NotifUI"
+NotifUI.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+NotifUI.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
--- Helper function to create UI elements
-local function create(className, properties)
-	local instance = Instance.new(className)
-	for prop, value in pairs(properties) do
-		instance[prop] = value
+Holder.Name = "Holder"
+Holder.Parent = NotifUI
+Holder.Active = true
+Holder.AnchorPoint = Vector2.new(1, 0)
+Holder.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+Holder.BackgroundTransparency = 1.000
+Holder.BorderColor3 = Color3.fromRGB(0, 0, 0)
+Holder.BorderSizePixel = 0
+Holder.Position = UDim2.new(1, 0, 0, 0)
+Holder.Size = UDim2.new(0.25, 0, 1, 0)
+Holder.CanvasSize = UDim2.new(0, 0, 0, 0)
+
+Sorter.Name = "Sorter"
+Sorter.Parent = Holder
+Sorter.HorizontalAlignment = Enum.HorizontalAlignment.Center
+Sorter.SortOrder = Enum.SortOrder.LayoutOrder
+Sorter.VerticalAlignment = Enum.VerticalAlignment.Bottom
+Sorter.Padding = UDim.new(0, 10)
+
+local function SetDefault(v1, v2)
+	v1 = v1 or {}
+	local v3 = {}
+	for i, v in next, v2 do
+		v3[i] = v1[i] or v2[i]
 	end
-	return instance
+	return v3
 end
 
-function NotificationLibrary:CreateNotification(title, body, notifType)
-	-- Validate notification type
-	if not CONFIG.COLORS[notifType] then
-		warn("Invalid notification type. Use: error, success, or info")
-		return
-	end
+function CreateNotification(Options)
+	local Default = {
+		Buttons = {
+			[1] = {
+				Title = 'Dismiss',
+				ClosesUI = true,
+				Callback = function() end
+			}
+		},
+		Title = 'Notification Title',
+		Content = 'Placeholder notification content',
+		Length = 5,
+		NeverExpire = false
+	}
+	Options = SetDefault(Options, Default)
 	
-	-- Remove existing notification
-	local playerGui = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
-	local existing = playerGui:FindFirstChild("ItsThe_Noobs")
-	if existing then
-		existing:Destroy()
-	end
-	
-	-- Create ScreenGui
-	local screenGui = create("ScreenGui", {
-		Name = "ItsThe_Noobs",
-		Parent = playerGui,
-		ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
-		ResetOnSpawn = false
-	})
-	
-	-- Calculate dynamic height based on body text length
-	local baseHeight = 100
-	local textLength = #body
-	local estimatedHeight = baseHeight + math.max(0, math.floor((textLength - 50) / 1.5))
-	estimatedHeight = math.min(estimatedHeight, 180) -- Cap max height
-	
-	-- Main notification frame
-	local notification = create("Frame", {
-		Name = "Notification",
-		Parent = screenGui,
-		BackgroundColor3 = CONFIG.BACKGROUND,
-		BorderSizePixel = 0,
-		Position = UDim2.new(0.5, -210, 1.1, 0),
-		Size = UDim2.new(0, 420, 0, estimatedHeight),
-		AnchorPoint = Vector2.new(0.5, 0),
-		ClipsDescendants = true
-	})
-	
-	-- Corner radius
-	create("UICorner", {
-		CornerRadius = UDim.new(0, 12),
-		Parent = notification
-	})
-	
-	-- Accent border
-	local border = create("Frame", {
-		Name = "AccentBorder",
-		Parent = notification,
-		BackgroundColor3 = CONFIG.COLORS[notifType],
-		BorderSizePixel = 0,
-		Position = UDim2.new(0, 0, 0, 0),
-		Size = UDim2.new(0, 4, 1, 0)
-	})
-	
-	-- Drop shadow using UIStroke
-	create("UIStroke", {
-		Parent = notification,
-		Color = Color3.fromRGB(0, 0, 0),
-		Thickness = 0,
-		Transparency = 0.5
-	})
-	
-	-- Icon container
-	local iconContainer = create("Frame", {
-		Name = "IconContainer",
-		Parent = notification,
-		BackgroundColor3 = CONFIG.COLORS[notifType],
-		BackgroundTransparency = 0.9,
-		Position = UDim2.new(0, 16, 0.5, -20),
-		Size = UDim2.new(0, 40, 0, 40)
-	})
-	
-	create("UICorner", {
-		CornerRadius = UDim.new(0, 8),
-		Parent = iconContainer
-	})
-	
-	create("ImageLabel", {
-		Name = "Icon",
-		Parent = iconContainer,
-		BackgroundTransparency = 1,
-		Position = UDim2.new(0.5, -12, 0.5, -12),
-		Size = UDim2.new(0, 24, 0, 24),
-		Image = CONFIG.ICONS[notifType],
-		ImageColor3 = CONFIG.COLORS[notifType],
-		ScaleType = Enum.ScaleType.Fit
-	})
-	
-	-- Title
-	create("TextLabel", {
-		Name = "Title",
-		Parent = notification,
-		BackgroundTransparency = 1,
-		Position = UDim2.new(0, 68, 0, 16),
-		Size = UDim2.new(1, -88, 0, 24),
-		Font = Enum.Font.GothamBold,
-		Text = title,
-		TextColor3 = Color3.fromRGB(250, 250, 250),
-		TextSize = 16,
-		TextXAlignment = Enum.TextXAlignment.Left
-	})
-	
-	-- Body text
-	local bodyHeight = estimatedHeight - 60
-	create("TextLabel", {
-		Name = "Body",
-		Parent = notification,
-		BackgroundTransparency = 1,
-		Position = UDim2.new(0, 68, 0, 44),
-		Size = UDim2.new(1, -88, 0, bodyHeight),
-		Font = Enum.Font.Gotham,
-		Text = body,
-		TextColor3 = Color3.fromRGB(161, 161, 170),
-		TextSize = 14,
-		TextWrapped = true,
-		TextXAlignment = Enum.TextXAlignment.Left,
-		TextYAlignment = Enum.TextYAlignment.Top
-	})
-	
-	-- Close button
-	local closeBtn = create("TextButton", {
-		Name = "CloseButton",
-		Parent = notification,
-		BackgroundTransparency = 1,
-		Position = UDim2.new(1, -36, 0, 8),
-		Size = UDim2.new(0, 28, 0, 28),
-		Font = Enum.Font.GothamBold,
-		Text = "×",
-		TextColor3 = Color3.fromRGB(161, 161, 170),
-		TextSize = 24
-	})
-	
-	-- Close button hover effect
-	closeBtn.MouseEnter:Connect(function()
-		closeBtn.TextColor3 = Color3.fromRGB(250, 250, 250)
-	end)
-	
-	closeBtn.MouseLeave:Connect(function()
-		closeBtn.TextColor3 = Color3.fromRGB(161, 161, 170)
-	end)
-	
-	-- Animation and auto-dismiss
-	local function dismissNotification()
-		notification:TweenPosition(
-			UDim2.new(0.5, -210, 1.1, 0),
-			Enum.EasingDirection.In,
-			Enum.EasingStyle.Back,
-			CONFIG.SLIDE_TIME,
-			true,
-			function()
-				screenGui:Destroy()
+	local Dismiss = Instance.new("Frame")
+	local UICorner = Instance.new("UICorner")
+	local TextLabel = Instance.new("TextLabel")
+	local TextLabel_2 = Instance.new("TextLabel")
+	local TextButton = Instance.new("TextButton")
+	local UICorner_2 = Instance.new("UICorner")
+
+	Dismiss.Name = "Notification"
+	Dismiss.Parent = Holder
+	Dismiss.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+	Dismiss.BackgroundTransparency = 0.300
+	Dismiss.BorderColor3 = Color3.fromRGB(27, 42, 53)
+	Dismiss.Position = UDim2.new(0.0996219441, 0, 0.646335304, 0)
+	Dismiss.Size = UDim2.new(0, 262, 0, 132)
+	Dismiss.Visible = false
+
+	UICorner.Parent = Dismiss
+
+	TextLabel.Parent = Dismiss
+	TextLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+	TextLabel.BackgroundTransparency = 1.000
+	TextLabel.BorderColor3 = Color3.fromRGB(27, 42, 53)
+	TextLabel.Position = UDim2.new(0.0572519079, 0, 0.0530303046, 0)
+	TextLabel.Size = UDim2.new(0, 194, 0, 29)
+	TextLabel.Font = Enum.Font.GothamMedium
+	TextLabel.Text = Options.Title
+	TextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+	TextLabel.TextSize = 16.000
+	TextLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+	TextLabel_2.Parent = Dismiss
+	TextLabel_2.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+	TextLabel_2.BackgroundTransparency = 1.000
+	TextLabel_2.BorderColor3 = Color3.fromRGB(27, 42, 53)
+	TextLabel_2.Position = UDim2.new(0.0572519079, 0, 0.303030312, 0)
+	TextLabel_2.Size = UDim2.new(0, 233, 0, 52)
+	TextLabel_2.Font = Enum.Font.Gotham
+	TextLabel_2.Text = Options.Content
+	TextLabel_2.TextColor3 = Color3.fromRGB(234, 234, 234)
+	TextLabel_2.TextSize = 14.000
+	TextLabel_2.TextWrapped = true
+	TextLabel_2.TextXAlignment = Enum.TextXAlignment.Left
+	TextLabel_2.TextYAlignment = Enum.TextYAlignment.Top
+
+	if Options.Buttons[1] then
+		TextButton.Parent = Dismiss
+		TextButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+		TextButton.BorderColor3 = Color3.fromRGB(27, 42, 53)
+		TextButton.Position = UDim2.new(0.0572519079, 0, 0.696969688, 0)
+		TextButton.Size = UDim2.new(0, 233, 0, 29)
+		TextButton.Font = Enum.Font.GothamMedium
+		TextButton.Text = Options.Buttons[1].Title or "Dismiss"
+		TextButton.TextColor3 = Color3.fromRGB(0, 0, 0)
+		TextButton.TextSize = 16.000
+		TextButton.TextStrokeColor3 = Color3.fromRGB(31, 33, 35)
+		UICorner_2.CornerRadius = UDim.new(0, 6)
+		UICorner_2.Parent = TextButton
+		TextButton.MouseButton1Click:Connect(function()
+			if Options.Buttons[1].Callback then
+				task.spawn(Options.Buttons[1].Callback)
 			end
-		)
+			if Options.Buttons[1].ClosesUI then
+				Dismiss:Destroy()
+			end
+		end)
 	end
-	
-	-- Close button handler
-	closeBtn.MouseButton1Click:Connect(dismissNotification)
-	
-	-- Slide in animation
-	notification:TweenPosition(
-		UDim2.new(0.5, -210, 0.85, 0),
-		Enum.EasingDirection.Out,
-		Enum.EasingStyle.Back,
-		CONFIG.SLIDE_TIME
-	)
-	
-	-- Auto-dismiss after duration
-	task.delay(CONFIG.DURATION, dismissNotification)
-	
-	return NotificationLibrary
+	Dismiss.Visible = true
+	if not Options.NeverExpire then
+		task.delay(Options.Length, function()
+			if not Dismiss then return end
+			local c = {'Frame', 'ScrollingFrame'}
+			for i, v in next, Dismiss:GetDescendants() do
+				if v.ClassName:find("Text") then
+					game:GetService("TweenService"):Create(v, TweenInfo.new(.4), {TextTransparency = 1}):Play()
+				else
+					if table.find(c, v.ClassName) then
+						game:GetService("TweenService"):Create(v, TweenInfo.new(.4), {Transparency = 1}):Play()
+					end
+				end
+			end
+			task.wait(.4)
+			Dismiss:Destroy()
+		end)
+	end
 end
 
-return NotificationLibrary
+return CreateNotification
+
+--[[ Example:
+ CreateNotification({Title = 'Notification Title', Content = 'Hey there! Thank you for using this script!', Length = 5, Buttons = {
+	[1] = {
+		Title = 'Dismiss', -- < the button text
+		ClosesUI = true, -- < if when clicked, the button closes the ui
+		Callback = function() --[[ What happens when the button is clicked end
+	}
+    Length: How long the notification stays on the screen for without the user closing it
+    NeverExpire: If set to true, This notification won't disappear until a button that has ClosesUI is clicked.
+}})
+]]
