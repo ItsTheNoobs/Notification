@@ -49,12 +49,6 @@ function NotificationLibrary:CreateNotification(title, body, notifType)
 		ResetOnSpawn = false
 	})
 	
-	-- Calculate dynamic height based on body text length
-	local baseHeight = 100
-	local textLength = #body
-	local estimatedHeight = baseHeight + math.max(0, math.floor((textLength - 50) / 1.5))
-	estimatedHeight = math.min(estimatedHeight, 180) -- Cap max height
-	
 	-- Main notification frame
 	local notification = create("Frame", {
 		Name = "Notification",
@@ -62,7 +56,7 @@ function NotificationLibrary:CreateNotification(title, body, notifType)
 		BackgroundColor3 = CONFIG.BACKGROUND,
 		BorderSizePixel = 0,
 		Position = UDim2.new(1.1, 0, 0.02, 0),
-		Size = UDim2.new(0, 420, 0, estimatedHeight),
+		Size = UDim2.new(0, 380, 0, 100),
 		ClipsDescendants = true
 	})
 	
@@ -137,13 +131,12 @@ function NotificationLibrary:CreateNotification(title, body, notifType)
 	})
 	
 	-- Body text
-	local bodyHeight = estimatedHeight - 60
 	create("TextLabel", {
 		Name = "Body",
 		Parent = notification,
 		BackgroundTransparency = 1,
 		Position = UDim2.new(0, 68, 0, 44),
-		Size = UDim2.new(1, -88, 0, bodyHeight),
+		Size = UDim2.new(1, -88, 0, 40),
 		Font = Enum.Font.Gotham,
 		Text = body,
 		TextColor3 = Color3.fromRGB(161, 161, 170),
